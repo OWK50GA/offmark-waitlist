@@ -1,0 +1,83 @@
+---
+description: "Figma Power rules: enforce Next.js+TypeScript + App Router, Tailwind usage, prefer shadcn components, and export/use design images to match Figma."
+globs:
+  - "**/*.{ts,tsx,js,jsx,md,mdx}"
+  - "app/**/*"
+  - "src/app/**/*"
+  - "src/components/**/*"
+  - "packages/**/src/components/**/*"
+alwaysApply: true
+priority: 20
+---
+
+# Figma Power — rules.mdc (Next.js + TypeScript + App Router + Tailwind + shadcn + Image rules)
+
+> Purpose: make the agent generate production-appropriate UI code from Figma while strictly following repository tech choices and design fidelity requirements.
+
+## 1. Project stack & routing (hard requirements)
+- The project **MUST** use **Next.js** and **TypeScript**. Any generated files that add runtime code **MUST** have `.ts`/`.tsx` extensions and TypeScript types where appropriate.
+- The project **MUST** use the **App Router** (`app/` directory). All new pages/route handlers **MUST** be created under `app/` using server or client components as appropriate.
+- The agent **MUST NOT** generate code that relies on the legacy `pages/` router unless an explicit repo convention exists and the user approves.
+
+## 2. Styling conventions
+- Use **Tailwind utility classes** as the default CSS approach. Generated components **MUST** express layout/spacing/visuals using Tailwind utilities or tokens mapped to Tailwind classes.
+- When design-system tokens exist (colors, spacing, typography), the agent **MUST** use tokenized Tailwind utility classes (e.g., `text-[var(--type-xx)]`, `bg-[theme('colors.primary.500')]` or the repo's token class names) rather than raw inline styles or hex codes.
+- The agent **MUST** add or propose a token to `design-system.md` if a matching token does not already exist, and ask the user for confirmation before committing that token.
+
+## 3. Component reuse & shadcn policy
+- Where an equivalent **shadcn** component exists in the repo or in the project's permitted component library, the agent **MUST** reuse the shadcn component (via composition/wrapping) rather than producing a new custom implementation.
+- If no shadcn equivalent exists, the agent **SHOULD**:
+  1. Create a lightweight wrapper or adapter component that exposes the project's preferred props/variants, and
+  2. Mark the wrapper with a comment linking to the Figma frame and suggesting a follow-up to merge with the canonical design system later.
+- The agent **MUST** not modify upstream shadcn library code; only create local adapters/wrappers.
+
+## 4. Images & exported assets (design fidelity)
+- For any image/assets present in the Figma frame **the agent MUST**:
+  - Export the image asset from Figma (or prompt the user to provide the exported asset) and store it in the repo under `public/assets/figma/` or `src/assets/figma/` depending on repo conventions.
+  - Use the exported asset in the generated component in the way it appears in Figma:
+    - If the design uses the image as a **background** (covers layout or decorative element), use a Tailwind utility or CSS background image with the exported asset to match positioning (`background-position`, `background-size: cover`, etc.). Example: `style={{ backgroundImage: "url('/assets/figma/hero-bg.png')" }}` combined with Tailwind utilities for sizing.
+    - If the image is **content** (e.g., product image, avatar), use Next.js `<Image />` from `next/image` with appropriate `fill`/`width`/`height` and `priority` flags as necessary to preserve layout and performance.
+  - If exact pixel parity requires CSS background with control over cropping/positioning, prefer CSS background usage to `<Image />` only if that better matches Figma’s result — but always favor accessibility and performance tradeoffs and document the reason in the PR.
+- The agent **MUST** include a short note in the PR describing which exported assets were added and where they are used.
+
+## 5. Accessibility & semantics
+- All generated components **MUST** use semantic HTML (e.g., `button`, `nav`, `main`, proper headings).
+- Where relevant, the agent **MUST** include `alt` text for content images and appropriate ARIA attributes for interactive elements.
+- Focus styles must remain visible; do not remove default focus outlines without replacing them using accessible tokenized focus styles.
+
+## 6. Code transform rules for MCP output
+- Treat Figma MCP output as reference. After generating React+Tailwind:
+  - Replace ephemeral Tailwind class combinations with project token classes where token equivalents exist.
+  - Prefer composing shadcn components for common controls (Button, Input, Select) rather than copying Figma's raw markup.
+  - Keep component prop shapes and variants consistent with existing repo patterns. When a new prop/variant is needed, add to `design-system.md` with a suggested schema.
+
+## 7. Hook patterns & file watch
+- The code-connect hook patterns **MUST** include the app router and component paths:
+  - `"patterns": ["**/*.tsx", "src/components/**/*", "src/app/**/*", "app/**/*", "**/components/**/*"]`
+- When a fileEdited event matches these patterns, the agent follows the code-connect flow (ask user, run mapping tools) and **MUST** propose an explicit mapping or show candidate matches.
+
+## 8. Visual parity checks & PR policy
+- After generating or adapting a component, the agent **SHOULD** perform an automated visual snapshot or instruct the user to run the visual QA step comparing rendered output vs Figma frame.
+- The agent **MUST** create a feature branch and open a PR with:
+  - A summary of changes,
+  - List of new/updated tokens in `design-system.md`,
+  - List of exported assets and their paths,
+  - Visual QA notes and any parity discrepancies.
+- The agent **MUST NOT** push directly to protected branches (e.g., `main`) without explicit user permission.
+
+## 9. Conflict resolution & precedence (explicit)
+- If repository conventions conflict with Figma suggestions, repository conventions **MUST** win unless the user explicitly approves overriding them.
+- If a Figma asset changes after a mapping exists, the agent **MUST** notify the user and propose either (A) update code to match, or (B) add a discrepancy note to `design-system.md`.
+
+## 10. Safety & non-actions
+- Never commit API keys or secrets.
+- When in doubt about visual fidelity vs performance/accessibility tradeoffs (e.g., background image CSS vs next/image), the agent **MUST** ask the user and include a short rationale in the PR.
+
+---
+
+## Agent-facing example prompts
+- Mapping prompt:
+  > \"I found a component `Button/Primary` in your app and a `Primary Button` in Figma. Map to `src/app/components/button-primary.tsx` and use `shadcn` Button adapter? (yes/no/show)\"\n
+- Export asset prompt:
+  > \"This Figma frame uses 1 exported image `hero-illustration.png`. Would you like me to export it into `public/assets/figma/hero-illustration.png` and use it as a background to match Figma? (yes/no)\"\n
+---

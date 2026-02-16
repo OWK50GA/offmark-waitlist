@@ -1,0 +1,161 @@
+import { Request, Response } from 'express';
+import { Waitlist, WaitlistEntry } from '../models/Waitlist';
+import { isValidEmail } from '../utils/emailValidator';
+
+/**
+ * Submit email controller function
+ * Handles POST /api/waitlist requests
+ */
+export async function submitEmail(req: Request, res: Response): Promise<void> {
+  try {
+    // Extract email from request body
+    const { email } = req.body;
+
+    // Check if email is provided
+    if (!email) {
+      res.status(400).json({
+        success: false,
+        error: {
+          code: 'MISSING_EMAIL',
+          message: 'Email field is required'
+        }
+      });
+      return;
+    }
+
+    // Validate email format
+    if (!isValidEmail(email)) {
+      res.status(400).json({
+        success: false,
+        error: {
+          code: 'INVALID_EMAIL',
+          message: 'Email format is invalid'
+        }
+      });
+      return;
+    }
+
+    // Check if email exceeds maximum length
+    if (email.length > 254) {
+      res.status(400).json({
+        success: false,
+        error: {
+          code: 'EMAIL_TOO_LONG',
+          message: 'Email exceeds 254 characters'
+        }
+      });
+      return;
+    }
+
+    const waitlist = new Waitlist();
+
+    const existingEntry = await waitlist.findByEmail(email);
+    if (existingEntry) {
+      res.status(409).json({
+        success: false,
+        error: {
+          code: 'DUPLICATE_EMAIL',
+          message: 'Email already exists in waitlist'
+        }
+      });
+      return;
+    }
+
+    const entry: WaitlistEntry = await waitlist.create(email);
+
+    res.status(201).json({
+      success: true,
+      message: 'Email successfully added to waitlist',
+      data: {
+        id: entry.id,
+        email: entry.email,
+        createdAt: entry.created_at.toISOString()
+      }
+    });
+  } catch (error: any) {
+    if (error.message === 'Email already exists in waitlist') {
+      res.status(409).json({
+        success: false,
+        error: {
+          code: 'DUPLICATE_EMAIL',
+          message: 'Email already exists in waitlist'
+        }
+      });
+      return;
+    }
+
+    console.error('Error submitting email:', error);
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'DATABASE_ERROR',
+        message: 'Failed to process email submission'
+      }
+    });
+  }
+}
+
+/**
+ * Get waitlist controller function
+ * Handles GET /api/waitlist requests with pagination
+ */
+export async function getWaitlist(req: Request, res: Response): Promise<void> {
+  try {
+    const pageParam = req.query.page;
+    const limitParam = req.query.limit;
+
+    let page = 1;
+    let limit = 50;
+
+    if (pageParam) {
+      const parsedPage = parseInt(pageParam as string, 10);
+      if (!isNaN(parsedPage) && parsedPage > 0) {
+        page = parsedPage;
+      }
+    }
+
+    if (limitParam) {
+      const parsedLimit = parseInt(limitParam as string, 10);
+      if (!isNaN(parsedLimit) && parsedLimit > 0) {
+        // Enforce maximum limit of 100
+        limit = Math.min(parsedLimit, 100);
+      }
+    }
+    const offset = (page - 1) * limit;
+
+    const waitlist = new Waitlist();
+
+    const entries = await waitlist.findAll(offset, limit);
+    const total = await waitlist.count();
+    const totalPages = Math.ceil(total / limit);
+
+    // Return paginated response
+    res.status(200).json({
+      success: true,
+      data: {
+        entries: entries.map(entry => ({
+          id: entry.id,
+          email: entry.email,
+          createdAt: entry.created_at.toISOString(),
+          updatedAt: entry.updated_at.toISOString()
+        })),
+        pagination: {
+          total,
+          page,
+          limit,
+          totalPages
+        }
+      }
+    });
+  } catch (error: any) {
+    // Handle database errors
+    console.error('Error retrieving waitlist:', error);
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'DATABASE_ERROR',
+        message: 'Failed to retrieve waitlist entries'
+      }
+    });
+  }
+}
