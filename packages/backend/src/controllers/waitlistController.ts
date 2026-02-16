@@ -120,9 +120,12 @@ export async function login (req: Request, res: Response): Promise<Response<any,
       });
     }
 
+    const useSSL = connectionString.includes('render.com')
+
     // Get database connection
     const pool = new Pool({
-      connectionString
+      connectionString,
+      ssl: useSSL ? { rejectUnauthorized: false } : undefined
     });
 
     // Find user by email
