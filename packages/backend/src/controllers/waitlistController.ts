@@ -1,6 +1,12 @@
 import { Request, Response } from 'express';
 import { Waitlist, WaitlistEntry } from '../models/Waitlist';
 import { isValidEmail } from '../utils/emailValidator';
+import { Pool } from 'pg';
+import bcrypt from 'bcryptjs'
+import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv'
+
+dotenv.config();
 
 /**
  * Submit email controller function
@@ -90,6 +96,118 @@ export async function submitEmail(req: Request, res: Response): Promise<void> {
       error: {
         code: 'DATABASE_ERROR',
         message: 'Failed to process email submission'
+      }
+    });
+  }
+}
+
+export async function login (req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined> {
+  try {
+    const { email, password } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({
+        success: false,
+        error: {
+          code: 'VALIDATION_ERROR',
+          message: 'Email and password are required'
+        }
+      });
+    }
+
+    // Get database connection
+    const pool = new Pool({
+      connectionString: process.env.DATABASE_URL
+    });
+
+    // Find user by email
+    const userResult = await pool.query(
+      'SELECT id, email, password_hash, role FROM users WHERE email = $1',
+      [email]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(401).json({
+        success: false,
+        error: {
+          code: 'UNAUTHORIZED',
+          message: 'Invalid email or password'
+        }
+      });
+    }
+
+    const user = userResult.rows[0];
+
+    // Verify password with bcrypt
+    const isValidPassword = await bcrypt.compare(password, user.password_hash);
+    
+    if (!isValidPassword) {
+      return res.status(401).json({
+        success: false,
+        error: {
+          code: 'UNAUTHORIZED',
+          message: 'Invalid email or password'
+        }
+      });
+    }
+
+    // Check if user has admin role
+    if (user.role !== 'admin') {
+      return res.status(403).json({
+        success: false,
+        error: {
+          code: 'FORBIDDEN',
+          message: 'Admin privileges required'
+        }
+      });
+    }
+
+    // Get JWT secret
+    const jwtSecret = process.env.JWT_SECRET;
+    if (!jwtSecret) {
+      return res.status(500).json({
+        success: false,
+        error: {
+          code: 'INTERNAL_ERROR',
+          message: 'JWT configuration error'
+        }
+      });
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { 
+        id: user.id,
+        email: user.email,
+        role: user.role
+      },
+      jwtSecret,
+      { expiresIn: '24h' }
+    );
+
+    res.json({
+      success: true,
+      data: {
+        token,
+        expiresIn: '24h',
+        user: {
+          id: user.id,
+          email: user.email,
+          role: user.role
+        }
+      }
+    });
+
+    // Close database connection
+    await pool.end();
+
+  } catch (error) {
+    console.error('Login error:', error);
+    res.status(500).json({
+      success: false,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Login failed'
       }
     });
   }
