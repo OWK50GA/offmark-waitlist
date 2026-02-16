@@ -8,6 +8,7 @@ import dotenv from 'dotenv'
 
 dotenv.config();
 
+const connectionString = process.env.DATABASE_URL;
 /**
  * Submit email controller function
  * Handles POST /api/waitlist requests
@@ -102,6 +103,10 @@ export async function submitEmail(req: Request, res: Response): Promise<void> {
 }
 
 export async function login (req: Request, res: Response): Promise<Response<any, Record<string, any>> | undefined> {
+  if (!connectionString) {
+    throw new Error("Connection string not found");
+  }
+
   try {
     const { email, password } = req.body;
     
@@ -117,7 +122,7 @@ export async function login (req: Request, res: Response): Promise<Response<any,
 
     // Get database connection
     const pool = new Pool({
-      connectionString: process.env.DATABASE_URL
+      connectionString
     });
 
     // Find user by email
