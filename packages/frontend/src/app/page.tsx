@@ -51,7 +51,7 @@ export default function WaitlistPage() {
       <div className="absolute bg-[rgba(240,90,37,0.29)] blur-[125px] h-[459px] left-[-230px] rounded-[229.5px] top-[1076px] md:w-[461px] pointer-events-none" />
       
       {/* Hero Background */}
-      <div className="absolute h-[994px] left-0 top-0 w-full mx-auto">
+      <div className="absolute h-[600px] md:h-[994px] left-0 top-0 w-full mx-auto">
         <Image
           alt=""
           className="absolute inset-0 object-cover pointer-events-none w-full h-full"
@@ -62,9 +62,9 @@ export default function WaitlistPage() {
       </div>
 
       {/* Main Content */}
-      <div className="relative backdrop-blur-xs bg-[rgba(33,31,31,0.68)] flex flex-col gap-[32px] min-h-[994px] items-center overflow-clip pb-[-2px] pt-[169px] px-4 md:px-[104px]">
+      <div className="relative backdrop-blur-xs bg-[rgba(33,31,31,0.68)] flex flex-col gap-[32px] min-h-[600px] md:min-h-[994px] items-center overflow-clip pb-[-2px] pt-[169px] px-4 md:px-[104px]">
         {/* Header with Logo */}
-        <div className="absolute h-[98px] left-0 top-0 w-full">
+        <div className="absolute h-24.5 left-0 top-0 w-full">
           <Image
             alt=""
             className="absolute inset-0 object-cover pointer-events-none w-full h-full"
@@ -101,7 +101,7 @@ export default function WaitlistPage() {
 
         {/* Email Form */}
         <form onSubmit={handleSubmit} className="relative w-full max-w-[569px] px-4 md:px-0 z-10">
-          <div className="backdrop-blur-sm bg-[rgba(255,255,255,0.08)] border-2 border-[rgba(100,100,100,0.38)] h-auto md:h-[68px] rounded-[30.4px] flex flex-col md:flex-row items-stretch md:items-center gap-3 md:gap-4 p-3 md:px-[26px] md:py-0">
+          <div className="backdrop-blur-sm bg-[rgba(255,255,255,0.08)] border-2 border-[rgba(100,100,100,0.38)] h-auto md:h-[68px] rounded-lg md:rounded-[30.4px] flex flex-col md:flex-row items-stretch md:items-center gap-3 md:gap-4 p-3 md:px-[26px] md:py-0">
             <input
               type="email"
               value={email}
@@ -166,13 +166,13 @@ export default function WaitlistPage() {
 
       {/* Features Section */}
       <div className="relative px-4 md:px-[112px] py-16">
-        <h2 className="font-['Poppins'] font-medium text-[40px] text-[#dcdcdc] text-center mb-7">
+        <h2 className="font-['Poppins'] font-medium text-[30px] md:text-[40px] text-[#dcdcdc] text-center mb-7">
           Features to Anticipate
         </h2>
         
         <p className="font-['Poppins'] text-[20px] text-[#dcdcdc] text-center mb-10">
           On official release, <span className="font-medium text-[#f05a25]">OffMark </span>
-          presents
+          presents:
         </p>
 
         {/* Feature Grid - 2x2 layout with varying heights */}
@@ -203,7 +203,7 @@ export default function WaitlistPage() {
             </div>
 
             {/* Chat Rooms - Bottom Left - TALLEST with chat interface */}
-            <div className="border border-[#7a5a51] h-[620px] rounded-[10px] overflow-hidden relative">
+            <div className="border border-[#7a5a51] h-130 md:h-155 rounded-[10px] overflow-hidden relative">
               <div className="backdrop-blur-[2px] bg-[#151414] h-full rounded-[10px] p-7 relative">
                 <div className="absolute bg-[rgba(240,90,37,0.28)] blur-[42px] h-[347px] w-[347px] rounded-[173.5px] left-[65px] top-[79px]" />
                 <p className="relative font-['Poppins'] text-[20px] text-[#dcdcdc] mb-7 z-10">
@@ -215,7 +215,7 @@ export default function WaitlistPage() {
                 {/* Chat interface with "Chats" header and DM snippets */}
                 <div className="relative mt-7 z-10">
                   {/* Full chat interface image showing "Chats" header and DM list */}
-                  <div className="relative h-[422px] w-full rounded-[17px] overflow-hidden">
+                  <div className="relative h-75 md:h-105.5 w-full rounded-[17px] overflow-hidden">
                     <Image
                       alt="Chat Rooms Interface"
                       src="/assets/figma/chat-offmark.png"
@@ -299,7 +299,7 @@ export default function WaitlistPage() {
                   </div>
                   
                   {/* Right taller image with overlay */}
-                  <div className="absolute h-[270px] md:h-[330px] w-[319px] md:w-[392px] rounded-[17px] overflow-hidden right-0 top-0">
+                  <div className="absolute h-[270px] md:h-[330px] w-[319px] md:w-[392px] rounded-[17px] overflow-hidden -right-4 md:right-0 top-0">
                     <div className="bg-[rgba(1,1,1,0.27)] absolute inset-0" />
                     <Image
                       alt="Creator space preview"
@@ -315,6 +315,79 @@ export default function WaitlistPage() {
 
         </div>
       </div>
+
+      {/* Footer */}
+      <footer className="relative border-t border-[rgba(122,90,81,0.3)] bg-[#0a0909] px-4 md:px-[112px] py-8 md:py-12">
+        <div className="max-w-[1183px] mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6 md:gap-8">
+            {/* Logo and Copyright */}
+            <div className="flex flex-col items-center md:items-start gap-3">
+              <div className="h-[25px] w-[134px] relative">
+                <Image
+                  alt="OffMark Logo"
+                  src="/assets/figma/frame-114x7.png"
+                  fill
+                  className="object-contain"
+                />
+              </div>
+              <p className="font-['Poppins'] text-[14px] text-[#9ca3af] text-center md:text-left">
+                © 2024 OffMark. All rights reserved.
+              </p>
+            </div>
+
+            {/* Social Links */}
+            <div className="flex flex-col items-center md:items-end gap-3">
+              <p className="font-['Poppins'] text-[16px] text-[#dcdcdc] font-medium">
+                Follow Us
+              </p>
+              <div className="flex gap-4 items-center">
+                {/* Placeholder for social icons - replace with actual links */}
+                <a 
+                  href="#" 
+                  className="w-10 h-10 rounded-full bg-[rgba(240,90,37,0.1)] border border-[rgba(240,90,37,0.3)] flex items-center justify-center hover:bg-[rgba(240,90,37,0.2)] transition-all"
+                  aria-label="Twitter"
+                >
+                  <span className="text-[#f05a25] text-xl">𝕏</span>
+                </a>
+                <a 
+                  href="#" 
+                  className="w-10 h-10 rounded-full bg-[rgba(240,90,37,0.1)] border border-[rgba(240,90,37,0.3)] flex items-center justify-center hover:bg-[rgba(240,90,37,0.2)] transition-all"
+                  aria-label="Instagram"
+                >
+                  <span className="text-[#f05a25] text-xl">📷</span>
+                </a>
+                <a 
+                  href="#" 
+                  className="w-10 h-10 rounded-full bg-[rgba(240,90,37,0.1)] border border-[rgba(240,90,37,0.3)] flex items-center justify-center hover:bg-[rgba(240,90,37,0.2)] transition-all"
+                  aria-label="LinkedIn"
+                >
+                  <span className="text-[#f05a25] text-xl">in</span>
+                </a>
+                <a 
+                  href="#" 
+                  className="w-10 h-10 rounded-full bg-[rgba(240,90,37,0.1)] border border-[rgba(240,90,37,0.3)] flex items-center justify-center hover:bg-[rgba(240,90,37,0.2)] transition-all"
+                  aria-label="Facebook"
+                >
+                  <span className="text-[#f05a25] text-xl">f</span>
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* Optional: Links section */}
+          <div className="mt-8 pt-6 border-t border-[rgba(122,90,81,0.2)] flex flex-col md:flex-row justify-center items-center gap-4 md:gap-8">
+            <a href="#" className="font-['Poppins'] text-[14px] text-[#9ca3af] hover:text-[#f05a25] transition-colors">
+              Privacy Policy
+            </a>
+            <a href="#" className="font-['Poppins'] text-[14px] text-[#9ca3af] hover:text-[#f05a25] transition-colors">
+              Terms of Service
+            </a>
+            <a href="#" className="font-['Poppins'] text-[14px] text-[#9ca3af] hover:text-[#f05a25] transition-colors">
+              Contact Us
+            </a>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }
