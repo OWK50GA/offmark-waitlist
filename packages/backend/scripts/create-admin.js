@@ -22,8 +22,11 @@ async function createAdmin() {
     throw new Error('Admin password not found');
   }
 
+  const useSSL = connectionString.includes('render.com')
+
   const pool = new Pool({
-    connectionString
+    connectionString,
+    ssl: useSSL ? { rejectUnauthorized: false }: undefined
   });
 
   try {

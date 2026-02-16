@@ -10,8 +10,11 @@ if (!connectionString) {
     throw new Error("Connection string not found");
 }
 
+const useSSL = connectionString.includes('render.com')
+
 const pool = new Pool({
-    connectionString
+    connectionString,
+    ssl: useSSL? { rejectUnauthorized: false } : undefined
 });
 
 fs.readdir('./migrations', (err, files) => { 
