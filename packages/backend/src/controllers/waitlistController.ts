@@ -5,6 +5,7 @@ import { Pool } from 'pg';
 import bcrypt from 'bcryptjs'
 import jwt from 'jsonwebtoken';
 import dotenv from 'dotenv'
+import mailer from '../mailer/mailer';
 
 dotenv.config();
 
@@ -70,6 +71,7 @@ export async function submitEmail(req: Request, res: Response): Promise<void> {
 
     const entry: WaitlistEntry = await waitlist.create(email);
 
+    // Respond first, then attempt to send a confirmation email asynchronously.
     res.status(201).json({
       success: true,
       message: 'Email successfully added to waitlist',
@@ -79,6 +81,15 @@ export async function submitEmail(req: Request, res: Response): Promise<void> {
         createdAt: entry.created_at.toISOString()
       }
     });
+
+    // fire-and-forget email; log any failure but don't affect response
+    mailer
+      .sendMail({
+        to: entry.email,
+        subject: 'Thanks for joining the Offmark waitlist!',
+        text: 'We have received your registration and will be in touch soon.',
+      })
+      .catch((err) => console.error('Failed to send confirmation email:', err));
   } catch (error: any) {
     if (error.message === 'Email already exists in waitlist') {
       res.status(409).json({

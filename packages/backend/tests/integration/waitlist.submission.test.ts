@@ -2,6 +2,7 @@ import request from 'supertest';
 import { createApp } from '../../src/app';
 import pool from '../../src/db/connection';
 import { Application } from 'express';
+import mailer from '../../src/mailer/mailer';
 
 /**
  * Integration Test: Complete Submission Flow
@@ -18,6 +19,11 @@ describe('Integration: Waitlist Submission Flow', () => {
 
   beforeAll(() => {
     app = createApp();
+  });
+
+  beforeEach(() => {
+    // stub out actual email sending so tests don't rely on SMTP
+    jest.spyOn(mailer, 'sendMail').mockResolvedValue({ messageId: 'mocked' } as any);
   });
 
   beforeEach(async () => {
@@ -39,6 +45,13 @@ describe('Integration: Waitlist Submission Flow', () => {
         .post('/api/waitlist')
         .send({ email })
         .expect(201);
+
+      // ensure confirmation email attempted
+      expect(mailer.sendMail).toHaveBeenCalledWith({
+        to: email,
+        subject: expect.any(String),
+        text: expect.any(String),
+      });
 
       // Verify response structure
       expect(response.body).toHaveProperty('success', true);
