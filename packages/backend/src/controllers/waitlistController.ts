@@ -17,7 +17,7 @@ const connectionString = process.env.DATABASE_URL;
 export async function submitEmail(req: Request, res: Response): Promise<void> {
   try {
     // Extract email from request body
-    const { email } = req.body;
+    const { email, firstName } = req.body;
 
     // Check if email is provided
     if (!email) {
@@ -26,6 +26,17 @@ export async function submitEmail(req: Request, res: Response): Promise<void> {
         error: {
           code: 'MISSING_EMAIL',
           message: 'Email field is required'
+        }
+      });
+      return;
+    }
+
+    if (!firstName) {
+      res.status(400).json({
+        success: false,
+        error: {
+          code: 'MISSING_NAME',
+          message: 'First Name is required'
         }
       });
       return;
@@ -69,7 +80,7 @@ export async function submitEmail(req: Request, res: Response): Promise<void> {
       return;
     }
 
-    const entry: WaitlistEntry = await waitlist.create(email);
+    const entry: WaitlistEntry = await waitlist.create(email, firstName);
 
     // Respond first, then attempt to send a confirmation email asynchronously.
     res.status(201).json({
@@ -88,7 +99,7 @@ export async function submitEmail(req: Request, res: Response): Promise<void> {
         to: entry.email,
         subject: 'Thanks for joining the Offmark waitlist!',
         text: 'We have received your registration and will be in touch soon.',
-      })
+      }, firstName)
       .catch((err) => console.error('Failed to send confirmation email:', err));
   } catch (error: any) {
     if (error.message === 'Email already exists in waitlist') {

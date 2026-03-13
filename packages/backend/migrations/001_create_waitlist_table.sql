@@ -9,6 +9,11 @@ CREATE TABLE IF NOT EXISTS waitlist (
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
 
+ALTER TABLE waitlist
+ADD COLUMN first_name VARCHAR(50);
+
+CREATE INDEX idx_waitlist_first_name ON waitlist (first_name);
+
 -- Add unique constraint on lowercase email for case-insensitive uniqueness
 CREATE UNIQUE INDEX idx_waitlist_email_lower ON waitlist (LOWER(email));
 

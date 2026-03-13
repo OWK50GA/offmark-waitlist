@@ -5,12 +5,18 @@ import Image from 'next/image';
 import toast, { Toaster } from 'react-hot-toast';
 
 export default function WaitlistPage() {
-  const [email, setEmail] = useState('');
+  const [formData, setFormData] = useState({
+    email: "",
+    firstName: ""
+  })
+  // const [email, setEmail] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   // const [message, setMessage] = useState('');
 
   const handleSubmit = async (e: React.SubmitEvent) => {
     e.preventDefault();
+    const isValid = formData.email.length > 0 && formData.firstName.length > 0;
+    if (!isValid) toast.error("Invalid name or email");
     console.log("Submitting...")
     setIsSubmitting(true);
     // setMessage('');
@@ -21,7 +27,7 @@ export default function WaitlistPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify(formData),
       });
 
       const data = await response.json();
@@ -29,7 +35,7 @@ export default function WaitlistPage() {
 
       if (response.ok && data.success) {
         toast.success('Successfully joined the waitlist!');
-        setEmail('');
+        setFormData({firstName: "", email: ''});
       } else {
         toast.error(data.error.message || 'Failed to join waitlist');
       }
@@ -100,30 +106,36 @@ export default function WaitlistPage() {
         </div>
 
         {/* Email Form */}
-        <form onSubmit={handleSubmit} className="relative w-full max-w-[569px] px-4 md:px-0 z-10">
-          <div className="backdrop-blur-sm bg-[rgba(255,255,255,0.08)] border-2 border-[rgba(100,100,100,0.38)] h-auto md:h-[68px] rounded-lg md:rounded-[30.4px] flex flex-col md:flex-row items-stretch md:items-center gap-3 md:gap-4 p-3 md:px-[26px] md:py-0">
+        <form onSubmit={handleSubmit} className="relative w-full flex flex-col gap-2 max-w-117 px-4 md:px-0 z-10">
+          <div className="backdrop-blur-sm bg-[rgba(255,255,255,0.08)] border-2 border-[rgba(100,100,100,0.38)] h-auto md:h-17 rounded-md md:rounded-md flex flex-col md:flex-row items-stretch md:items-center gap-3 md:gap-4 p-3 md:px-6.5 md:py-0">
+            <input
+              type="text"
+              value={formData.firstName}
+              onChange={(e) => setFormData((prev) => ({...prev, firstName: e.target.value}))}
+              placeholder="Your First name"
+              required
+              className="flex-1 bg-transparent font-['Poppins'] text-[16px] md:text-[20px] text-white placeholder-gray-400 outline-none py-2 md:py-0"
+            />
+          </div>
+          <div className="backdrop-blur-sm bg-[rgba(255,255,255,0.08)] border-2 border-[rgba(100,100,100,0.38)] h-auto md:h-17 rounded-md md:rounded-md flex flex-col md:flex-row items-stretch md:items-center gap-3 md:gap-4 p-3 md:px-6.5 md:py-0">
             <input
               type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              value={formData.email}
+              onChange={(e) => setFormData((prev) => ({...prev, email: e.target.value}))}
               placeholder="Your email address"
               required
               className="flex-1 bg-transparent font-['Poppins'] text-[16px] md:text-[20px] text-white placeholder-gray-400 outline-none py-2 md:py-0"
             />
+          </div>
+          {/* <div className="backdrop-blur-sm bg-[rgba(255,255,255,0.08)] border-2 border-[rgba(100,100,100,0.38)] h-auto md:h-[68px] rounded-lg md:rounded-[30.4px] flex flex-col md:flex-row items-stretch md:items-center gap-3 md:gap-4 p-3 md:px-[26px] md:py-0">
+          </div> */}
             <button
               type="submit"
               disabled={isSubmitting}
-              className="backdrop-blur-[2px] bg-white border-2 border-[rgba(181,181,181,0.14)] h-[48px] md:h-[59px] rounded-[24px] md:rounded-[29.5px] px-0 md:px-7 font-['Poppins'] font-semibold text-[16px] md:text-[20px] text-[#f05a25] hover:bg-opacity-90 transition-all disabled:opacity-50 whitespace-nowrap"
+              className="backdrop-blur-[2px] bg-white border-2 border-[rgba(181,181,181,0.14)] h-12 md:h-14.75 rounded-md md:rounded-md px-0 md:px-7 font-['Poppins'] font-semibold text-[16px] md:text-[20px] text-[#f05a25] hover:bg-opacity-90 transition-all disabled:opacity-50 whitespace-nowrap"
             >
               {isSubmitting ? 'Joining...' : 'Join Waitlist'}
             </button>
-          </div>
-          {/* {message && (
-            <p className={`mt-4 text-center font-['Poppins'] text-[14px] md:text-[15px]`}>
-              
-              {message}
-            </p>
-          )} */}
         </form>
 
         {/* Phone Mockup - Only top 40%, sliced in half */}

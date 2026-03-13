@@ -9,6 +9,7 @@ DROP FUNCTION IF EXISTS update_updated_at_column();
 -- Drop indexes (will be dropped automatically with table, but explicit for clarity)
 DROP INDEX IF EXISTS idx_waitlist_created_at;
 DROP INDEX IF EXISTS idx_waitlist_email_lower;
+DROP INDEX IF EXISTS idx_waitlist_first_name;
 
 -- Drop table
 DROP TABLE IF EXISTS waitlist;

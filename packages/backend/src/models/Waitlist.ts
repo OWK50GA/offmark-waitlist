@@ -27,17 +27,17 @@ export class Waitlist {
    * @returns Promise<WaitlistEntry> - Created waitlist entry
    * @throws Error if email already exists or database operation fails
    */
-  async create(email: string): Promise<WaitlistEntry> {
+  async create(email: string, first_name: string): Promise<WaitlistEntry> {
     const normalizedEmail = email.toLowerCase().trim();
     
     const query = `
-      INSERT INTO waitlist (email)
-      VALUES ($1)
+      INSERT INTO waitlist (email, first_name)
+      VALUES ($1, $2)
       RETURNING id, email, created_at, updated_at
     `;
     
     try {
-      const result: QueryResult<WaitlistEntry> = await this.pool.query(query, [normalizedEmail]);
+      const result: QueryResult<WaitlistEntry> = await this.pool.query(query, [normalizedEmail, first_name]);
       return result.rows[0];
     } catch (error: any) {
       // Check for unique constraint violation (duplicate email)
