@@ -1,9 +1,10 @@
 import dotenv from 'dotenv';
+import { Resend } from 'resend';
 dotenv.config();
 
-import { createTransport, Transporter, SendMailOptions } from "nodemailer";
+// import { createTransport, Transporter, SendMailOptions } from "nodemailer";
 
-interface MailOptions extends SendMailOptions {
+interface MailOptions {
   to: string;
   subject: string;
   text?: string;
@@ -11,48 +12,49 @@ interface MailOptions extends SendMailOptions {
 }
 
 class Mailer {
-  private transporter: Transporter;
-
+  private resend: Resend;
+  private from: string;
+  private apiKey: string;
+  private template_id: string;
+  
   constructor() {
-    const host = process.env.SMTP_HOST;
-    const port = process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : 587;
-    const secure = process.env.SMTP_SECURE === 'true';
-
-    if (!host) {
-      throw new Error('SMTP_HOST is not defined in environment variables');
+    const apiKey = process.env.RESEND_API_KEY;
+    const template_id = process.env.RESEND_EMAIL_ONBOARDING_TEMPLATE
+    if (!apiKey || !template_id) {
+      throw new Error("Resend Variables not set");
     }
-
-    this.transporter = createTransport({
-      host,
-      port,
-      secure,
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
+    this.apiKey = apiKey;
+    this.template_id = template_id;
+    this.resend = new Resend(this.apiKey);
+    this.from = "offmarkltd@gmail.com"
   }
-
+  
   async sendMail(options: MailOptions) {
-    const from = process.env.SMTP_FROM || process.env.SMTP_USER || '';
-    if (!from) {
-      throw new Error('SMTP_FROM or SMTP_USER must be defined to send emails');
+    // return this.transporter.sendMail(mailOptions);
+    const { data, error } = await this.resend.emails.send({
+      from: this.from,
+      to: [options.to],
+      // subject: options.subject,
+      // html: options.html,
+      template: {
+        id: this.template_id,
+        variables: {
+          first_name: "Phoenix"
+        }
+      }
+    })
+
+    if (error) {
+      console.log("Error sending email: ", error);
     }
 
-    const mailOptions: SendMailOptions = {
-      from,
-      to: options.to,
-      subject: options.subject,
-      text: options.text,
-      html: options.html,
-    };
-
-    return this.transporter.sendMail(mailOptions);
+    console.log("Email sent successfully to ", options.to)
   }
 }
 
-// export a single instance that can be reused throughout the app
+// // export a single instance that can be reused throughout the app
 const mailer = new Mailer();
 export default mailer;
 export { Mailer, MailOptions };
+
 
