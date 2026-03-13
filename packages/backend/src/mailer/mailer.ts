@@ -26,7 +26,7 @@ class Mailer {
     this.apiKey = apiKey;
     this.template_id = template_id;
     this.resend = new Resend(this.apiKey);
-    this.from = "Osinachi from Offmark <hello@contact.offmarkltd.com>"
+    this.from = "Mma from Offmark <hello@contact.offmarkltd.com>"
   }
   
   async sendMail(options: MailOptions, first_name?: string) {
