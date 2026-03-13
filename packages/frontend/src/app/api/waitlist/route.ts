@@ -3,14 +3,14 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email } = body;
+    const { email, firstName } = body;
 
     // Validate email
-    if (!email) {
+    if (!email || !firstName) {
       return NextResponse.json(
         { 
           success: false, 
-          error: 'Email is required' 
+          error: 'Email and First name required' 
         },
         { status: 400 }
       );
@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, firstName }),
     });
 
     const data = await response.json();

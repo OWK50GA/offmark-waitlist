@@ -26,11 +26,13 @@ class Mailer {
     this.apiKey = apiKey;
     this.template_id = template_id;
     this.resend = new Resend(this.apiKey);
-    this.from = "offmarkltd@gmail.com"
+    this.from = "Osinachi <@contact.offmarkltd.com>"
   }
   
-  async sendMail(options: MailOptions) {
+  async sendMail(options: MailOptions, first_name?: string) {
     // return this.transporter.sendMail(mailOptions);
+    const firstname = options.to.split('a')[0];
+    const capitalized = firstname.charAt(0).toUpperCase() + firstname.slice(1);
     const { data, error } = await this.resend.emails.send({
       from: this.from,
       to: [options.to],
@@ -39,10 +41,12 @@ class Mailer {
       template: {
         id: this.template_id,
         variables: {
-          first_name: "Phoenix"
+          first_name: first_name ?? capitalized
         }
       }
     })
+
+    console.log(data);
 
     if (error) {
       console.log("Error sending email: ", error);
